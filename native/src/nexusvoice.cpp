@@ -21,7 +21,7 @@ void clear_buffer(NexusVoiceBuffer* output) {
 }
 
 const char* nexusvoice_runtime_version(void) {
-    return "0.2.0-preview.native-boundary";
+    return "0.0.1-preview.1-native-boundary";
 }
 
 int nexusvoice_initialize(const char* model_directory) {

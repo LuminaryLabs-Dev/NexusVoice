@@ -1,3 +1,9 @@
-# Basic Emitter Demo
+# Basic Demo
 
-Add two `NexusVoiceEmitter` components, assign them to `NexusVoiceDemo`, and start the Node reference server. The example demonstrates sequential speech, focus changes, and stopping.
+1. Import this sample from Package Manager.
+2. Start the local bridge with `cd node && npm run serve`.
+3. Open `NexusVoiceDemo.unity` and enter Play Mode.
+4. Enter text and select **Generate and Play**.
+
+The scene creates one `NexusVoiceEmitter` and `AudioSource` at runtime. No manager,
+material, dialogue database, or additional component is required.

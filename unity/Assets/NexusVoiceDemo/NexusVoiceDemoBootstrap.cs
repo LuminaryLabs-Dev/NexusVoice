@@ -11,7 +11,7 @@ public sealed class NexusVoiceDemoBootstrap : MonoBehaviour
     private void Awake()
     {
         emitter = gameObject.AddComponent<NexusVoiceEmitter>();
-        emitter.OnAudioClipReady.AddListener(_ => status.text = "Audio ready");
+        emitter.OnClipReady.AddListener(_ => status.text = "Audio ready");
         emitter.OnError.AddListener(error => status.text = "Error: " + error);
 
         Canvas canvas = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)).GetComponent<Canvas>();

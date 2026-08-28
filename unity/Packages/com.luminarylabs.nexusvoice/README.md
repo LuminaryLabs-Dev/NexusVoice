@@ -1,23 +1,35 @@
 # NexusVoice Unity Package
 
-NexusVoice exposes one component: `NexusVoiceEmitter`.
+NexusVoice `0.0.1-preview.1` exposes one required component: `NexusVoiceEmitter`.
 
 ```csharp
 emitter.Speak("Hello from NexusVoice.");
 ```
 
-Add the component to a GameObject with an `AudioSource`. The preview release defaults to **Node Bridge** mode: run `npm run serve` from the repository's `node` folder while authoring in Unity.
+This first preview uses the local Node bridge for authoring. Run `npm run serve`
+from the repository's `node/` folder before generating speech in Unity.
 
-## API
+## Public API
 
 - `Speak(text)` interrupts this emitter and starts a line.
 - `Queue(text)` adds a line after the current line.
 - `GenerateAsync(text)` returns an `AudioClip` without playing it.
-- `Focus()` and `ReleaseFocus()` select the current speaker.
-- `Skip()`, `Stop()`, and `ClearQueue()` control playback.
+- `Focus()` and `ReleaseFocus()` control the focused emitter.
+- `Skip()`, `Stop()`, `ClearQueue()`, and `ClearCache()` control runtime state.
 
-`OnAudioClipReady` exposes each generated clip. Focus, speech lifecycle, text, and error events are also available in the Inspector.
+Events use the `EventWrapper` naming scheme:
+
+- `OnClipReady`
+- `OnPlaybackStarted`
+- `OnPlaybackFinished`
+- `OnFocusGained`
+- `OnFocusLost`
+- `OnError`
 
 ## Native status
 
-The native ABI validates model installation and reports deterministic errors, but ONNX inference and phonemization are not bundled in this preview. Native mode is therefore not a shipping runtime yet. Games must not be released with Native mode until platform binaries pass the native and standalone validation gates documented in the repository.
+Native mode is an integration boundary in this release. It validates model files
+and returns an explicit unavailable error because ONNX inference and phonemization
+are scheduled for `0.1.0-preview.1`.
+
+See `Documentation~/QuickStart.md` for setup and examples.

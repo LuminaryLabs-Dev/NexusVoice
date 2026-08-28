@@ -1,14 +1,11 @@
 # Changelog
 
-## 0.2.0-preview.1
+## 0.0.1-preview.1 — 2026-08-28
 
-- Consolidated the Unity-facing API into one `NexusVoiceEmitter` component.
-- Added speech queues, focus transitions, fades, `AudioClip` events, cancellation controls, and explicit errors.
-- Added native initialization, validation, cleanup, and last-error ABI functions.
-- Added a deterministic Unity model-pack installer and SHA-256 manifest.
-- Added Unity package documentation and a basic emitter sample.
-
-## 0.1.0-preview.1
-
-- Added the Kokoro Node reference engine and localhost bridge.
-- Added the first Unity bridge client and native C ABI scaffold.
+- Established the first NexusVoice preview version line.
+- Kept `NexusVoiceEmitter` as the only required Unity runtime component.
+- Split public API, internal runtime, backends, editor tools, samples, and tests.
+- Added focus priority, cancellation, bounded caching, fades, and readable errors.
+- Added Node bridge health checks and WAV response validation.
+- Added package documentation, release guidance, deterministic metadata, and validation tooling.
+- Preserved the explicit native boundary; native inference remains deferred to `0.1.0-preview.1`.

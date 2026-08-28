@@ -1,6 +1,6 @@
 {
   "name": "nexusvoice",
-  "version": "1.0.0",
+  "version": "0.0.1-preview.1",
   "description": "Kokoro reference and authoring engine for NexusVoice.",
   "main": "engine.cjs",
   "scripts": {
@@ -12,7 +12,9 @@
     "serve": "node server.cjs",
     "smoke": "node scripts/smoke.cjs",
     "smoke:voices": "node scripts/smoke-voices.cjs",
-    "validate:source": "node scripts/validate-source.cjs"
+    "validate:source": "node scripts/validate-source.cjs",
+    "release:preview": "node ../tools/create-release/create-release.cjs",
+    "build:native": "node ../tools/build-native/build.cjs"
   },
   "repository": {
     "type": "git",
@@ -21,13 +23,16 @@
   "keywords": ["tts", "kokoro", "onnx", "unity"],
   "author": "Luminary Labs",
   "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/LuminaryLabs-Dev/NexusVoice/issues"
   },
   "homepage": "https://github.com/LuminaryLabs-Dev/NexusVoice#readme",
   "dependencies": {
-    "kokoro-js": "^1.2.1",
-    "wav-encoder": "^1.3.0"
+    "kokoro-js": "1.2.1",
+    "wav-encoder": "1.3.0"
   }
 }

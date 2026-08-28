@@ -1,8 +1,11 @@
 # Changelog
 
-## 0.2.0-preview.1
+## 0.0.1-preview.1
 
-- Replaced the bridge-specific client with one `NexusVoiceEmitter` component.
-- Added direct speech, queued speech, generated `AudioClip` events, focus transitions, fades, skip, stop, and error events.
-- Added private native bindings while preserving Node Bridge mode for validated authoring.
-- Added a basic package sample and deterministic model installer.
+- Established the first preview version line.
+- Kept `NexusVoiceEmitter` as the only required runtime component.
+- Separated public API, internal runtime, Node, native, editor, sample, and tests.
+- Added queueing, focus priority, cancellation, fades, bounded caching, and clear errors.
+- Added Node bridge health checks and malformed-WAV validation.
+- Added Edit Mode and Play Mode test assemblies.
+- Added package documentation and a self-contained sample scene.

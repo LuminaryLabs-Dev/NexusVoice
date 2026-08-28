@@ -1,0 +1,22 @@
+{
+  "name": "LuminaryLabs.NexusVoice.Tests.EditMode",
+  "rootNamespace": "LuminaryLabs.NexusVoice.Tests",
+  "references": [
+    "LuminaryLabs.NexusVoice.Runtime",
+    "LuminaryLabs.NexusVoice.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

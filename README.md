@@ -1,6 +1,6 @@
 # NexusVoice
 
-NexusVoice is an offline Kokoro text-to-speech toolkit with a deliberately small Unity API.
+NexusVoice is a Kokoro text-to-speech toolkit with one public Unity component:
 
 ```csharp
 emitter.Speak("Welcome to NexusVoice.");
@@ -8,38 +8,41 @@ emitter.Speak("Welcome to NexusVoice.");
 
 ## Repository layout
 
-- `node/` — validated Kokoro reference engine, WAV generation, model installer, and localhost authoring bridge.
-- `unity/` — Unity 6 demo project and embedded `com.luminarylabs.nexusvoice` package.
-- `native/` — stable C ABI, model validation, memory ownership, and native-runtime integration boundary.
+- `unity/` — Unity demo project and embedded UPM package.
+- `node/` — validated Kokoro engine and localhost authoring bridge.
+- `native/` — stable C ABI and future embedded inference runtime.
+- `tools/` — package validation and release preparation.
+- `release/` — store-specific release requirements, without generated archives.
 
-## Current release status
+## Current version
 
-Version `0.2.0-preview.1` provides one Unity component, `NexusVoiceEmitter`, with direct and queued speech, generated `AudioClip` events, speaker focus transitions, configurable fades, stop/skip controls, and Node Bridge authoring mode.
+`0.0.1-preview.1` is the first package preview. It provides:
 
-The Node path is validated. The native ABI builds and validates inputs, but native ONNX inference and phonemization are **not yet bundled**. This preview is not an offline standalone Unity release.
+- One required component: `NexusVoiceEmitter`.
+- Direct and queued speech.
+- `AudioClip` lifecycle events using the `EventWrapper` naming scheme.
+- Focus priority, interruption, fades, cancellation, and bounded caching.
+- Node Bridge authoring mode.
+- Editor setup checks, a sample scene, and package tests.
 
-## Run the reference engine
+The Node path is validated. Native ONNX inference and phonemization are not bundled,
+so this version is not an offline standalone Unity runtime.
+
+## Start the preview
 
 ```bash
 cd node
 npm install
 npm run model:download
+npm run validate:source
 npm run smoke
 npm run serve
 ```
 
-Open `unity/` as a Unity 6 project and keep the emitter in **Node Bridge** mode.
+Open `unity/` in Unity, import the Basic Emitter Demo sample, and keep the emitter
+in **Node Bridge** mode.
 
-## Install the Unity model pack
-
-```bash
-cd node
-npm run unity:model
-```
-
-This copies the ignored ONNX model and seven selected voice embeddings into `unity/Assets/StreamingAssets/NexusVoice`. The tracked manifest records expected SHA-256 hashes.
-
-## Build the native boundary
+## Native boundary
 
 ```bash
 cmake -S native -B native/build
@@ -47,22 +50,19 @@ cmake --build native/build
 ctest --test-dir native/build --output-on-failure
 ```
 
-The boundary intentionally returns a clear unavailable error for synthesis until pinned ONNX Runtime and phonemizer dependencies are integrated and validated on each target platform.
+The native boundary deliberately returns an unavailable error until pinned ONNX
+Runtime and phonemizer dependencies are integrated for `0.1.0-preview.1`.
 
-## Supported voices
+## Versioning
 
-- `af_heart`
-- `af_bella`
-- `af_nicole`
-- `am_michael`
-- `am_fenrir`
-- `bf_emma`
-- `bm_george`
+- Small iteration: increment `preview.N`.
+- Meaningful compatible revision: increment the patch number.
+- Major preview milestone: increment the minor number.
+- Stable commercial API: `1.0.0`.
 
-## Large files
-
-The model, voice packs, generated WAV files, native binaries, Unity build cache, and release archives are ignored. They belong in release packages rather than ordinary Git history.
+See `docs/VERSIONING.md` and `docs/RELEASE_CHECKLIST.md`.
 
 ## License
 
-NexusVoice source code is available under the ISC License. Third-party dependencies and model files retain their own licenses; see `THIRD_PARTY_NOTICES.md` before redistribution.
+NexusVoice source code uses the ISC License. Third-party components and model data
+retain their own terms; review `THIRD_PARTY_NOTICES.md` before redistribution.

@@ -1,6 +1,7 @@
 node/node_modules/
 node/output/
 node/models/kokoro/onnx/*.onnx
+node/models/kokoro/onnx/*.partial
 unity/Library/
 unity/Temp/
 unity/Obj/
@@ -15,9 +16,9 @@ unity/Assets/StreamingAssets/NexusVoice/voices/*.bin
 unity/Assets/StreamingAssets/NexusVoice/config.json
 unity/Assets/StreamingAssets/NexusVoice/tokenizer.json
 unity/Assets/StreamingAssets/NexusVoice/tokenizer_config.json
-unity/Packages/com.luminarylabs.nexusvoice/Plugins/**/*.dll
-unity/Packages/com.luminarylabs.nexusvoice/Plugins/**/*.so
-unity/Packages/com.luminarylabs.nexusvoice/Plugins/**/*.dylib
+unity/Packages/com.luminarylabs.nexusvoice/Runtime/Plugins/**/*.dll
+unity/Packages/com.luminarylabs.nexusvoice/Runtime/Plugins/**/*.so
+unity/Packages/com.luminarylabs.nexusvoice/Runtime/Plugins/**/*.dylib
 *.csproj
 *.sln
 *.userprefs
