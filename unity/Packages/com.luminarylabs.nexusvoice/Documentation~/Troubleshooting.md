@@ -1,26 +1,25 @@
 # Troubleshooting
 
+## Native plugin unavailable
+
+Run `npm run native:all` from `node/`. Confirm the three Linux libraries exist
+under `Runtime/Plugins/Linux/x86_64`.
+
+## Native model missing
+
+Run `npm run native:all`, then `npm run unity:model:verify` from `node/`.
+
 ## Bridge unavailable
 
-Run `npm run serve` from `node/`. The bridge listens on `127.0.0.1:47831`.
-Use **Tools > NexusVoice > Setup** to check `/health`.
-
-## Model missing
-
-Run `npm run model:download`. For the Unity model folder, run
-`npm run unity:model` and `npm run unity:model:verify`.
+Node Bridge mode requires `npm run serve` from `node/`. The bridge listens on
+`127.0.0.1:47831`.
 
 ## Response is not a WAV
 
-Confirm the emitter endpoint ends with `/synthesize`. The package rejects HTML,
-JSON error pages, and incomplete audio before creating an `AudioClip`.
+This applies to Node Bridge mode. Confirm the endpoint ends with `/synthesize`.
 
-## Native plugin unavailable
+## Generation is slow
 
-This is expected in `0.0.1-preview.1`. Select **Node Bridge**. Native inference is
-not bundled in this version.
+The first request loads the model. Later requests reuse the runtime and cache.
+Keep the model on local storage and avoid running multiple CPU-heavy generators.
 
-## Request timed out
-
-Confirm the Node process is running and the model has downloaded completely. Then
-increase **Request Timeout Seconds** if the machine needs more inference time.

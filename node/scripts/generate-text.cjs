@@ -1,4 +1,5 @@
 const fs = require('node:fs');
+const path = require('node:path');
 const { synthesize } = require('../engine.cjs');
 
 const request = JSON.parse(process.argv[2] || '{}');

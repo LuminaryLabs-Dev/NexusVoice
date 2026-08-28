@@ -1,23 +1,24 @@
 # Installation
 
-## Repository preview
+## Native Linux x64 preview
 
-1. Open `unity/` in Unity 2022.3 LTS or newer.
-2. In a terminal, open `node/`.
-3. Run `npm install`.
-4. Run `npm run model:download`.
-5. Run `npm run serve`.
-6. Add `NexusVoiceEmitter` to a GameObject. Unity adds the required `AudioSource`.
+1. Open a terminal in `node/`.
+2. Run `npm ci --onnxruntime-node-install-cuda=skip`.
+3. Run `npm run model:download`.
+4. Run `npm run native:all`.
+5. Open `unity/` in Unity 2022.3 LTS or newer.
+6. Add `NexusVoiceEmitter` to a GameObject.
 
 The package is embedded at `unity/Packages/com.luminarylabs.nexusvoice`.
+The native model is installed under
+`Assets/StreamingAssets/NexusVoice/Model`.
 
-## Model files
+## Node reference backend
 
-The Node bridge uses `node/models/kokoro/onnx/model_quantized.onnx`. To prepare
-the future native path, run `npm run unity:model`, then verify it with
-`npm run unity:model:verify`.
+Run `npm run serve` from `node/`, then select **Node Bridge** on the emitter.
+Node is optional in the native player path.
 
 ## Preview limitation
 
-`0.0.1-preview.1` requires the local Node bridge during authoring. It is not an
-offline standalone customer runtime.
+Only Linux x64 native synthesis has been executed in the sandbox. Validate Unity
+import and the target player before distributing a build.

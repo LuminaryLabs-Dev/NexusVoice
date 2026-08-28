@@ -9,8 +9,10 @@ namespace LuminaryLabs.NexusVoice
     internal sealed class NativeBackend : INexusVoiceBackend
     {
         private const string Library = "nexusvoice";
-        private static readonly object NativeLock = new object();
-        private static bool initialized;
+        private const int CancelledStatus = -7;
+        private static readonly object RuntimeLock = new object();
+        private static readonly object NativeCallLock = new object();
+        private static IntPtr runtimeHandle;
         private static string initializedModelPath;
 
         private readonly string modelPath;
@@ -31,20 +33,20 @@ namespace LuminaryLabs.NexusVoice
             {
                 data = await Task.Run(
                     () => Synthesize(speech, cancellationToken),
-                    cancellationToken);
+                    CancellationToken.None);
             }
             catch (DllNotFoundException exception)
             {
                 throw new InvalidOperationException(
-                    "NexusVoice native mode is unavailable because the platform plugin is not installed. "
-                    + "Use Node Bridge mode in 0.0.1-preview.1.",
+                    "NexusVoice native mode is unavailable because its platform plugin "
+                    + "is not installed.",
                     exception);
             }
             catch (EntryPointNotFoundException exception)
             {
                 throw new InvalidOperationException(
-                    "NexusVoice found an incompatible native plugin. "
-                    + "Use the plugin matching this package version.",
+                    "NexusVoice found an incompatible native plugin. Install the plugin "
+                    + "matching this package version.",
                     exception);
             }
 
@@ -55,43 +57,50 @@ namespace LuminaryLabs.NexusVoice
                 1,
                 data.SampleRate,
                 false);
-            clip.SetData(data.Samples, 0);
+            if (!clip.SetData(data.Samples, 0))
+            {
+                UnityEngine.Object.Destroy(clip);
+                throw new InvalidOperationException(
+                    "Unity could not copy the generated NexusVoice audio samples.");
+            }
             return new NexusVoiceResult(clip, speech.Voice);
         }
 
         internal static void Reset()
         {
-            lock (NativeLock)
-            {
-                initialized = false;
-                initializedModelPath = null;
-            }
+            Shutdown();
         }
 
         internal static void Shutdown()
         {
-            lock (NativeLock)
+            lock (NativeCallLock)
             {
-                if (!initialized)
+                IntPtr handle;
+                lock (RuntimeLock)
+                {
+                    handle = runtimeHandle;
+                    runtimeHandle = IntPtr.Zero;
+                    initializedModelPath = null;
+                }
+
+                if (handle == IntPtr.Zero)
                 {
                     return;
                 }
 
                 try
                 {
-                    nexusvoice_shutdown();
+                    nexusvoice_cancel(handle);
+                    nexusvoice_destroy(handle);
                 }
                 catch (DllNotFoundException)
                 {
-                    // The preview can run entirely through the Node bridge.
+                    // Node Bridge mode does not install a native plugin.
                 }
                 catch (EntryPointNotFoundException)
                 {
                     // An incompatible plugin must not break application shutdown.
                 }
-
-                initialized = false;
-                initializedModelPath = null;
             }
         }
 
@@ -99,32 +108,31 @@ namespace LuminaryLabs.NexusVoice
             NexusVoiceRequest speech,
             CancellationToken cancellationToken)
         {
-            lock (NativeLock)
+            lock (NativeCallLock)
             {
+                IntPtr handle = GetOrCreateRuntime();
+                nexusvoice_reset_cancel(handle);
+                using CancellationTokenRegistration registration = cancellationToken.Register(
+                    state => nexusvoice_cancel((IntPtr)state),
+                    handle,
+                    useSynchronizationContext: false);
                 cancellationToken.ThrowIfCancellationRequested();
-                if (!initialized
-                    || !string.Equals(initializedModelPath, modelPath, StringComparison.Ordinal))
-                {
-                    int initializeResult = nexusvoice_initialize(modelPath);
-                    if (initializeResult != 0)
-                    {
-                        throw new InvalidOperationException(GetNativeError(
-                            "NexusVoice native initialization failed."));
-                    }
-
-                    initialized = true;
-                    initializedModelPath = modelPath;
-                }
 
                 NativeBuffer buffer = default;
                 int result = nexusvoice_synthesize(
+                    handle,
                     speech.Text,
                     speech.Voice,
                     speech.Speed,
                     ref buffer);
+                if (result == CancelledStatus)
+                {
+                    throw new OperationCanceledException(cancellationToken);
+                }
                 if (result != 0)
                 {
                     throw new InvalidOperationException(GetNativeError(
+                        handle,
                         "NexusVoice native synthesis failed."));
                 }
 
@@ -149,9 +157,43 @@ namespace LuminaryLabs.NexusVoice
             }
         }
 
-        private static string GetNativeError(string fallback)
+        private IntPtr GetOrCreateRuntime()
         {
-            IntPtr pointer = nexusvoice_last_error();
+            lock (RuntimeLock)
+            {
+                if (runtimeHandle != IntPtr.Zero
+                    && string.Equals(
+                        initializedModelPath,
+                        modelPath,
+                        StringComparison.Ordinal))
+                {
+                    return runtimeHandle;
+                }
+
+                if (runtimeHandle != IntPtr.Zero)
+                {
+                    nexusvoice_destroy(runtimeHandle);
+                    runtimeHandle = IntPtr.Zero;
+                    initializedModelPath = null;
+                }
+
+                int result = nexusvoice_create(modelPath, out IntPtr created);
+                if (result != 0 || created == IntPtr.Zero)
+                {
+                    throw new InvalidOperationException(GetNativeError(
+                        IntPtr.Zero,
+                        "NexusVoice native initialization failed."));
+                }
+
+                runtimeHandle = created;
+                initializedModelPath = modelPath;
+                return runtimeHandle;
+            }
+        }
+
+        private static string GetNativeError(IntPtr handle, string fallback)
+        {
+            IntPtr pointer = nexusvoice_last_error(handle);
             return pointer == IntPtr.Zero
                 ? fallback
                 : Marshal.PtrToStringAnsi(pointer) ?? fallback;
@@ -178,22 +220,31 @@ namespace LuminaryLabs.NexusVoice
         }
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
-        private static extern int nexusvoice_initialize(string modelDirectory);
+        private static extern int nexusvoice_create(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string modelDirectory,
+            out IntPtr runtime);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
         private static extern int nexusvoice_synthesize(
-            string text,
-            string voice,
+            IntPtr runtime,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string text,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string voice,
             float speed,
             ref NativeBuffer output);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr nexusvoice_last_error();
+        private static extern void nexusvoice_reset_cancel(IntPtr runtime);
+
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void nexusvoice_cancel(IntPtr runtime);
+
+        [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr nexusvoice_last_error(IntPtr runtime);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
         private static extern void nexusvoice_free_buffer(ref NativeBuffer output);
 
         [DllImport(Library, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void nexusvoice_shutdown();
+        private static extern void nexusvoice_destroy(IntPtr runtime);
     }
 }

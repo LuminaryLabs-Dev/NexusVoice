@@ -1,1 +1,1 @@
-No macOS plugin is shipped in `0.0.1-preview.1`.
+No macOS plugin is shipped in `0.1.0-preview.1`.

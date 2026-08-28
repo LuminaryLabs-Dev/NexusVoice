@@ -2,23 +2,25 @@
 
 This is the validated Kokoro implementation and temporary Unity authoring bridge.
 
-It is versioned with the Unity package. The current release is `0.0.1-preview.1`.
+It is versioned with the Unity package. The current release is `0.1.0-preview.1`.
 
 ```bash
-npm install
+npm install --onnxruntime-node-install-cuda=skip
 npm run model:download
 npm run smoke
 npm run serve
 ```
 
-The checked-in `.npmrc` keeps ONNX Runtime on the CPU path. The preview does not
-download CUDA libraries during installation.
+The install flag keeps ONNX Runtime on the CPU path and avoids downloading CUDA
+libraries. Use the same flag with `npm ci` in automated builds.
 
 Available scripts:
 
 - `npm run generate:joke` — generate the reference joke WAV.
 - `npm run smoke` — start the bridge and validate health plus WAV synthesis.
-- `npm run unity:model` — install the model and seven selected voices into the Unity demo project.
+- `npm run native:all` — prepare, build, test, compare, and install the Linux x64 native runtime.
+- `npm run unity:model` — install the prepared native model pack into the Unity demo project.
+- `npm run unity:model:node` — install the legacy Node-bridge model pack.
 - `npm run unity:model:verify` — verify every installed model-pack SHA-256 hash.
 - `npm run serve` — listen on `127.0.0.1:47831`.
 - `npm run validate:source` — validate the UPM structure and public API.

@@ -1,6 +1,7 @@
 # NexusVoice
 
-NexusVoice is a Kokoro text-to-speech toolkit with one public Unity component:
+NexusVoice is a local Kokoro text-to-speech toolkit with one public Unity
+component:
 
 ```csharp
 emitter.Speak("Welcome to NexusVoice.");
@@ -9,49 +10,47 @@ emitter.Speak("Welcome to NexusVoice.");
 ## Repository layout
 
 - `unity/` — Unity demo project and embedded UPM package.
-- `node/` — validated Kokoro engine and localhost authoring bridge.
-- `native/` — stable C ABI and future embedded inference runtime.
-- `tools/` — package validation and release preparation.
-- `release/` — store-specific release requirements, without generated archives.
+- `native/` — C++ runtime and stable C ABI.
+- `node/` — known-good Kokoro reference engine and optional authoring bridge.
+- `tools/` — native setup, validation and release tooling.
+- `release/` — store release requirements.
 
 ## Current version
 
-`0.0.1-preview.1` is the first package preview. It provides:
+`0.1.0-preview.1` adds real embedded Kokoro inference:
 
 - One required component: `NexusVoiceEmitter`.
-- Direct and queued speech.
-- `AudioClip` lifecycle events using the `EventWrapper` naming scheme.
-- Focus priority, interruption, fades, cancellation, and bounded caching.
-- Node Bridge authoring mode.
-- Editor setup checks, a sample scene, and package tests.
+- Native float PCM generation through Sherpa-ONNX and ONNX Runtime.
+- 53 native Kokoro voices, including the seven curated package voices.
+- Direct speech, queues, focus, interruption, fades and bounded caching.
+- Cancellation, native buffer cleanup and malformed-audio protection.
+- Node Bridge mode retained as a reference and authoring fallback.
 
-The Node path is validated. Native ONNX inference and phonemization are not bundled,
-so this version is not an offline standalone Unity runtime.
+Linux x64 native synthesis is validated in the sandbox. Unity Editor import,
+player builds, Windows, macOS and Android remain release gates.
 
-## Start the preview
+This preview is not cleared for commercial distribution. Its current phonemizer
+path includes GPL-3.0-or-later eSpeak NG functionality and data; complete formal
+license review or replace that path before selling it on itch or submitting it to
+the Unity Asset Store.
+
+## Build the native preview
 
 ```bash
 cd node
-npm install
+npm ci --onnxruntime-node-install-cuda=skip
 npm run model:download
-npm run validate:source
-npm run smoke
-npm run serve
+npm run native:all
 ```
 
-Open `unity/` in Unity, import the Basic Emitter Demo sample, and keep the emitter
-in **Node Bridge** mode.
+Then open `unity/` and use the default **Native** runtime mode.
 
-## Native boundary
+For Node Bridge mode instead:
 
 ```bash
-cmake -S native -B native/build
-cmake --build native/build
-ctest --test-dir native/build --output-on-failure
+cd node
+npm run serve
 ```
-
-The native boundary deliberately returns an unavailable error until pinned ONNX
-Runtime and phonemizer dependencies are integrated for `0.1.0-preview.1`.
 
 ## Versioning
 
@@ -64,5 +63,6 @@ See `docs/VERSIONING.md` and `docs/RELEASE_CHECKLIST.md`.
 
 ## License
 
-NexusVoice source code uses the ISC License. Third-party components and model data
-retain their own terms; review `THIRD_PARTY_NOTICES.md` before redistribution.
+NexusVoice source uses the ISC License. Sherpa-ONNX, ONNX Runtime, Kokoro,
+eSpeak-NG and model assets retain their own terms; review
+`THIRD_PARTY_NOTICES.md` before redistribution.

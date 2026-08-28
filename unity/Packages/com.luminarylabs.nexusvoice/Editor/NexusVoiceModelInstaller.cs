@@ -8,15 +8,15 @@ namespace LuminaryLabs.NexusVoice.Editor
     {
         private static readonly string[] RequiredFiles =
         {
-            "model_quantized.onnx",
-            "config.json",
-            "tokenizer.json",
-            "tokenizer_config.json",
+            "model.onnx",
+            "voices.bin",
+            "tokens.txt",
+            "lexicon-us-en.txt",
             "model-manifest.json"
         };
 
         private static string ModelDirectory =>
-            Path.Combine(Application.streamingAssetsPath, "NexusVoice");
+            Path.Combine(Application.streamingAssetsPath, "NexusVoice", "Model");
 
         [MenuItem("Tools/NexusVoice/Validate Model Installation")]
         public static void ValidateAndReport()
@@ -37,7 +37,7 @@ namespace LuminaryLabs.NexusVoice.Editor
         {
             if (!Directory.Exists(ModelDirectory))
             {
-                message = "Model directory not found. Run `npm run unity:model` from node/.";
+                message = "Native model directory not found. Run `npm run native:all` from node/.";
                 return false;
             }
 
@@ -45,21 +45,21 @@ namespace LuminaryLabs.NexusVoice.Editor
             {
                 if (!File.Exists(Path.Combine(ModelDirectory, file)))
                 {
-                    message = file + " is missing. Run `npm run unity:model` from node/.";
+                    message = file + " is missing. Run `npm run native:all` from node/.";
                     return false;
                 }
             }
 
-            string voicesDirectory = Path.Combine(ModelDirectory, "voices");
-            if (!Directory.Exists(voicesDirectory)
-                || Directory.GetFiles(voicesDirectory, "*.bin").Length == 0)
+            string phonemizerDirectory = Path.Combine(ModelDirectory, "espeak-ng-data");
+            if (!Directory.Exists(phonemizerDirectory)
+                || !File.Exists(Path.Combine(phonemizerDirectory, "phontab")))
             {
-                message = "Voice files are missing. Run `npm run unity:model` from node/.";
+                message = "Native phonemizer data is missing. Run `npm run native:all` from node/.";
                 return false;
             }
 
-            message = "Model and voice files are installed. Run `npm run unity:model:verify` "
-                + "for SHA-256 verification.";
+            message = "Native model, 53 voices and phonemizer data are installed. "
+                + "Run `npm run unity:model:verify` for SHA-256 verification.";
             return true;
         }
     }

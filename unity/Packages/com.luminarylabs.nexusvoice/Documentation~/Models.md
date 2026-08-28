@@ -1,8 +1,10 @@
 # Models and voices
 
-The preview uses the quantized Kokoro-82M ONNX model at 24 kHz.
+The native preview uses the quantized Kokoro-82M v1.0 ONNX graph at 24 kHz.
+The native model builder adds runtime metadata without changing graph weights or
+operators, combines 53 voice embeddings, and installs eSpeak-NG frontend data.
 
-Validated voice ids:
+Curated voice ids:
 
 - `af_heart`
 - `af_bella`
@@ -17,9 +19,11 @@ Commands:
 ```bash
 cd node
 npm run model:download
-npm run unity:model
+npm run native:all
 npm run unity:model:verify
 ```
 
-The model, voice embeddings, and generated WAV files are intentionally excluded
-from ordinary Git history. `model-manifest.json` records expected SHA-256 hashes.
+Models, voice embeddings, native dependencies and generated WAV files are
+excluded from ordinary Git history. The generated model manifest records sizes
+and SHA-256 hashes.
+

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-preview.1
+
+- Added embedded Kokoro generation through the NexusVoice native C API.
+- Added 53 native voice IDs, cancellation and safe PCM buffer transfer.
+- Made Native the default emitter backend while retaining Node Bridge mode.
+- Validated the Linux x64 native engine against the Node reference output.
+
 ## 0.0.1-preview.1
 
 - Established the first preview version line.

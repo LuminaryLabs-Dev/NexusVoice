@@ -1,4 +1,5 @@
 node/node_modules/
+node/.npmrc
 node/output/
 node/models/kokoro/onnx/*.onnx
 node/models/kokoro/onnx/*.partial
@@ -9,6 +10,9 @@ unity/Logs/
 unity/UserSettings/
 unity/MemoryCaptures/
 native/build/
+native/vendor/
+native/models/
+native/output/
 /package-lock.json
 dist/
 unity/Assets/StreamingAssets/NexusVoice/*.onnx
@@ -16,9 +20,16 @@ unity/Assets/StreamingAssets/NexusVoice/voices/*.bin
 unity/Assets/StreamingAssets/NexusVoice/config.json
 unity/Assets/StreamingAssets/NexusVoice/tokenizer.json
 unity/Assets/StreamingAssets/NexusVoice/tokenizer_config.json
+unity/Assets/StreamingAssets/NexusVoice/Model/
+unity/Assets/StreamingAssets/NexusVoice/Model.meta
 unity/Packages/com.luminarylabs.nexusvoice/Runtime/Plugins/**/*.dll
 unity/Packages/com.luminarylabs.nexusvoice/Runtime/Plugins/**/*.so
 unity/Packages/com.luminarylabs.nexusvoice/Runtime/Plugins/**/*.dylib
+unity/Packages/com.luminarylabs.nexusvoice/Runtime/Plugins/**/*.dll.meta
+unity/Packages/com.luminarylabs.nexusvoice/Runtime/Plugins/**/*.so.meta
+unity/Packages/com.luminarylabs.nexusvoice/Runtime/Plugins/**/*.dylib.meta
+unity/Packages/com.luminarylabs.nexusvoice/ThirdPartyLicenses~/
+unity/Packages/com.luminarylabs.nexusvoice/ThirdPartyLicenses~.meta
 *.csproj
 *.sln
 *.userprefs

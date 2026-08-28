@@ -18,16 +18,16 @@ namespace LuminaryLabs.NexusVoice.Editor
             if (emitter != null && emitter.RuntimeMode == NexusVoiceRuntimeMode.NodeBridge)
             {
                 EditorGUILayout.HelpBox(
-                    "0.0.1-preview.1 uses the local Node bridge. Start it with "
+                    "Node Bridge mode requires the local reference server. Start it with "
                     + "`cd node && npm run serve` before generating speech.",
                     MessageType.Info);
             }
             else
             {
                 EditorGUILayout.HelpBox(
-                    "Native inference is not included in 0.0.1-preview.1. "
-                    + "Use Node Bridge mode for this preview.",
-                    MessageType.Warning);
+                    "Native mode requires the platform plugin and prepared model pack. "
+                    + "Run `cd node && npm run native:all` for Linux x64.",
+                    MessageType.Info);
             }
 
             if (GUILayout.Button("Open NexusVoice Setup"))

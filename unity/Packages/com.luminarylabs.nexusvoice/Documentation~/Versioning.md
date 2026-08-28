@@ -9,3 +9,6 @@ NexusVoice uses semantic versions with preview identifiers.
 
 Published versions are never reused or decreased. Every release updates the package
 manifest, both changelogs, release notes, archive names, and release tag.
+
+`0.1.0-preview.1` is the embedded native-inference milestone. Further fixes on
+this implementation increment to `0.1.0-preview.2`.

@@ -13,9 +13,10 @@ Milestones:
 
 - `0.0.1-preview.1` — UPM package and Node authoring bridge.
 - `0.0.2-preview.1` — reliability and documentation milestone.
-- `0.1.0-preview.1` — embedded Windows inference.
-- `0.2.0-preview.1` — macOS and Linux inference.
-- `0.3.0-preview.1` — Android and Quest inference.
+- `0.1.0-preview.1` — embedded native inference, validated on Linux x64.
+- `0.1.x-preview.N` — Linux reliability fixes and the first validated Windows x64 build.
+- `0.2.0-preview.1` — validated macOS inference.
+- `0.3.0-preview.1` — validated Android and Quest inference.
 - `1.0.0` — tested offline commercial release.
 
 Published versions are immutable and never reused or decreased. A release updates

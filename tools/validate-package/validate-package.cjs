@@ -3,7 +3,7 @@ const path = require('node:path');
 
 const repositoryRoot = path.resolve(__dirname, '..', '..');
 const packageRoot = path.join(repositoryRoot, 'unity', 'Packages', 'com.luminarylabs.nexusvoice');
-const expectedVersion = '0.0.1-preview.1';
+const expectedVersion = '0.1.0-preview.1';
 
 function fail(message) {
   throw new Error(`NexusVoice package validation failed: ${message}`);
@@ -101,6 +101,58 @@ const requiredApi = [
 ];
 for (const fragment of requiredApi) {
   if (!emitter.includes(fragment)) fail(`missing API fragment: ${fragment}`);
+}
+
+const nativeBackend = fs.readFileSync(path.join(packageRoot, 'Runtime/Backends/NativeBackend.cs'), 'utf8');
+for (const fragment of [
+  'nexusvoice_create',
+  'nexusvoice_synthesize',
+  'nexusvoice_reset_cancel',
+  'nexusvoice_cancel',
+  'nexusvoice_free_buffer',
+  'nexusvoice_destroy'
+]) {
+  if (!nativeBackend.includes(fragment)) fail(`native backend is missing ${fragment}`);
+}
+
+const linuxPluginRoot = path.join(packageRoot, 'Runtime', 'Plugins', 'Linux', 'x86_64');
+if (fs.existsSync(path.join(linuxPluginRoot, 'libnexusvoice.so'))) {
+  for (const filename of [
+    'libnexusvoice.so',
+    'libsherpa-onnx-c-api.so',
+    'libonnxruntime.so'
+  ]) {
+    if (!fs.existsSync(path.join(linuxPluginRoot, filename))) {
+      fail(`installed Linux plugin is missing ${filename}`);
+    }
+    if (!fs.existsSync(path.join(linuxPluginRoot, `${filename}.meta`))) {
+      fail(`installed Linux plugin is missing ${filename}.meta`);
+    }
+  }
+
+  const licensesRoot = path.join(packageRoot, 'ThirdPartyLicenses~');
+  for (const filename of [
+    'SHERPA-ONNX-APACHE-2.0.txt',
+    'ONNXRUNTIME-MIT.txt',
+    'ESPEAK-NG-GPL-3.0-OR-LATER.txt'
+  ]) {
+    if (!fs.existsSync(path.join(licensesRoot, filename))) {
+      fail(`installed native package is missing license ${filename}`);
+    }
+  }
+}
+
+for (const relativePath of [
+  'native/include/nexusvoice.h',
+  'native/src/nexusvoice.cpp',
+  'native/src/kokoro_runtime.cpp',
+  'native/tests/native_smoke.cpp',
+  'tools/native/setup.cjs',
+  'tools/native/prepare-model.cjs',
+  'tools/native/install-unity.cjs',
+  'tools/native/validate-audio.cjs'
+]) {
+  if (!fs.existsSync(path.join(repositoryRoot, relativePath))) fail(`missing ${relativePath}`);
 }
 
 const assetExtensions = new Set(['.cs', '.asmdef', '.unity']);

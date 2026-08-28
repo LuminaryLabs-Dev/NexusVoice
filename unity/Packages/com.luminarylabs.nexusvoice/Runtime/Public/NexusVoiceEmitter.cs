@@ -30,11 +30,11 @@ namespace LuminaryLabs.NexusVoice
         [SerializeField] private bool cacheEnabled = true;
         [SerializeField, Min(1)] private int cacheCapacity = 32;
 
-        [Header("Preview Runtime")]
-        [SerializeField] private NexusVoiceRuntimeMode runtimeMode = NexusVoiceRuntimeMode.NodeBridge;
+        [Header("Runtime")]
+        [SerializeField] private NexusVoiceRuntimeMode runtimeMode = NexusVoiceRuntimeMode.Native;
         [SerializeField] private string nodeEndpoint = "http://127.0.0.1:47831/synthesize";
         [SerializeField, Min(1)] private int requestTimeoutSeconds = 120;
-        [SerializeField] private string modelDirectory = "NexusVoice";
+        [SerializeField] private string modelDirectory = "NexusVoice/Model";
 
         [Header("Events")]
         public AudioClipEventWrapper OnClipReady = new AudioClipEventWrapper();
@@ -74,7 +74,6 @@ namespace LuminaryLabs.NexusVoice
         private static void ResetStatics()
         {
             NexusVoiceFocus.Reset();
-            NativeBackend.Shutdown();
             NativeBackend.Reset();
             Application.quitting -= NativeBackend.Shutdown;
             Application.quitting += NativeBackend.Shutdown;

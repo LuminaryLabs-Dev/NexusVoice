@@ -23,8 +23,22 @@ NexusVoice depends on third-party software and model data. Their licenses apply 
 
 ## ONNX Runtime
 
-- Purpose: ONNX model execution used by the Node reference engine and planned native runtime.
+- Purpose: ONNX model execution used by the Node reference engine and native runtime.
 - Project: Microsoft ONNX Runtime.
 - Declared project license: MIT.
 
-Before publishing a customer bundle, retain the complete license texts supplied with every included model, package, runtime library, and voice file. Native phonemizer redistribution remains a release gate and is not represented as complete by the preview package.
+## sherpa-onnx
+
+- Purpose: native Kokoro text frontend and inference API.
+- Project: `k2-fsa/sherpa-onnx`.
+- Pinned native version: `1.13.6`.
+- Declared project license: Apache License 2.0.
+
+## eSpeak NG
+
+- Purpose: phonemization data and functionality included by the current Sherpa-ONNX Kokoro path.
+- Project: `espeak-ng/espeak-ng`.
+- Declared project license: GNU General Public License version 3 or later.
+- Commercial and Unity Asset Store distribution is blocked pending formal legal review or replacement with a commercially compatible phonemizer path.
+
+Before publishing a customer bundle, retain the complete license texts supplied with every included model, package, runtime library, phonemizer, and voice file. These notices summarize upstream declarations; they are not legal advice and do not mark commercial redistribution as approved.

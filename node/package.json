@@ -1,12 +1,13 @@
 {
   "name": "nexusvoice",
-  "version": "0.0.1-preview.1",
+  "version": "0.1.0-preview.1",
   "description": "Kokoro reference and authoring engine for NexusVoice.",
   "main": "engine.cjs",
   "scripts": {
     "test": "npm run generate:joke",
     "model:download": "node scripts/download-model.cjs",
-    "unity:model": "node scripts/install-unity-model.cjs",
+    "unity:model:node": "node scripts/install-unity-model.cjs",
+    "unity:model": "node ../tools/native/install-unity.cjs",
     "unity:model:verify": "node scripts/verify-unity-model.cjs",
     "generate:joke": "node scripts/generate-kokoro-joke.cjs",
     "serve": "node server.cjs",
@@ -14,7 +15,13 @@
     "smoke:voices": "node scripts/smoke-voices.cjs",
     "validate:source": "node scripts/validate-source.cjs",
     "release:preview": "node ../tools/create-release/create-release.cjs",
-    "build:native": "node ../tools/build-native/build.cjs"
+    "native:setup": "node ../tools/native/setup.cjs",
+    "native:prepare": "node ../tools/native/prepare-model.cjs",
+    "native:build": "node ../tools/build-native/build.cjs",
+    "native:validate": "node ../tools/native/validate-audio.cjs",
+    "native:install": "node ../tools/native/install-unity.cjs",
+    "native:all": "npm run native:setup && npm run native:prepare && npm run native:build && npm run native:validate && npm run native:install",
+    "build:native": "npm run native:build"
   },
   "repository": {
     "type": "git",

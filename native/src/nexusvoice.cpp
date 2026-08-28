@@ -2,14 +2,18 @@
 #include "kokoro_runtime.h"
 
 #include <cstdlib>
+#include <cstring>
 #include <memory>
-#include <mutex>
+#include <new>
 #include <string>
 
+struct NexusVoiceRuntime {
+    KokoroRuntime kokoro;
+    std::string last_error;
+};
+
 namespace {
-std::mutex runtime_mutex;
-std::unique_ptr<KokoroRuntime> runtime;
-thread_local std::string last_error;
+thread_local std::string startup_error;
 
 void clear_buffer(NexusVoiceBuffer* output) {
     if (output) {
@@ -21,70 +25,108 @@ void clear_buffer(NexusVoiceBuffer* output) {
 }
 
 const char* nexusvoice_runtime_version(void) {
-    return "0.0.1-preview.1-native-boundary";
+    return "0.1.0-preview.1+sherpa-onnx-1.13.6";
 }
 
-int nexusvoice_initialize(const char* model_directory) {
-    std::lock_guard<std::mutex> guard(runtime_mutex);
-    last_error.clear();
-
+int32_t nexusvoice_create(
+    const char* model_directory,
+    NexusVoiceRuntime** output_runtime) {
+    startup_error.clear();
+    if (!output_runtime) {
+        startup_error = "NexusVoice runtime output is required.";
+        return NEXUSVOICE_ERROR_INVALID_ARGUMENT;
+    }
+    *output_runtime = nullptr;
     if (!model_directory || model_directory[0] == '\0') {
-        last_error = "NexusVoice model directory is required.";
-        return -1;
+        startup_error = "NexusVoice model directory is required.";
+        return NEXUSVOICE_ERROR_INVALID_ARGUMENT;
     }
 
-    auto candidate = std::make_unique<KokoroRuntime>();
-    if (!candidate->initialize(model_directory, last_error)) {
-        return -2;
+    std::unique_ptr<NexusVoiceRuntime> candidate(new (std::nothrow) NexusVoiceRuntime());
+    if (!candidate) {
+        startup_error = "NexusVoice could not allocate its native runtime.";
+        return NEXUSVOICE_ERROR_MEMORY;
     }
 
-    runtime = std::move(candidate);
-    return 0;
+    if (!candidate->kokoro.initialize(model_directory, candidate->last_error)) {
+        startup_error = candidate->last_error;
+        return NEXUSVOICE_ERROR_MODEL;
+    }
+
+    *output_runtime = candidate.release();
+    return NEXUSVOICE_OK;
 }
 
-int nexusvoice_synthesize(const char* text, const char* voice, float speed, NexusVoiceBuffer* output) {
-    std::lock_guard<std::mutex> guard(runtime_mutex);
+int32_t nexusvoice_synthesize(
+    NexusVoiceRuntime* runtime,
+    const char* text,
+    const char* voice,
+    float speed,
+    NexusVoiceBuffer* output) {
     clear_buffer(output);
-    last_error.clear();
-
-    if (!output) {
-        last_error = "NexusVoice output buffer is required.";
-        return -1;
+    if (!runtime || !output) {
+        startup_error = "NexusVoice runtime and output buffer are required.";
+        return NEXUSVOICE_ERROR_INVALID_ARGUMENT;
     }
-    if (!runtime) {
-        last_error = "NexusVoice native runtime is not initialized.";
-        return -2;
-    }
+    runtime->last_error.clear();
     if (!text || text[0] == '\0') {
-        last_error = "NexusVoice speech text is required.";
-        return -3;
+        runtime->last_error = "NexusVoice speech text is required.";
+        return NEXUSVOICE_ERROR_INVALID_ARGUMENT;
+    }
+    if (std::strlen(text) > 8192) {
+        runtime->last_error = "NexusVoice speech text exceeds 8192 UTF-8 bytes.";
+        return NEXUSVOICE_ERROR_INVALID_ARGUMENT;
     }
     if (!voice || voice[0] == '\0') {
-        last_error = "NexusVoice voice id is required.";
-        return -4;
+        runtime->last_error = "NexusVoice voice id is required.";
+        return NEXUSVOICE_ERROR_INVALID_ARGUMENT;
     }
     if (speed < 0.5f || speed > 1.5f) {
-        last_error = "NexusVoice speed must be between 0.5 and 1.5.";
-        return -5;
+        runtime->last_error = "NexusVoice speed must be between 0.5 and 1.5.";
+        return NEXUSVOICE_ERROR_INVALID_ARGUMENT;
     }
 
-    return runtime->synthesize(text, voice, speed, output, last_error) ? 0 : -6;
+    return runtime->kokoro.synthesize(
+        text,
+        voice,
+        speed,
+        output,
+        runtime->last_error);
 }
 
-const char* nexusvoice_last_error(void) {
-    return last_error.c_str();
+void nexusvoice_cancel(NexusVoiceRuntime* runtime) {
+    if (runtime) {
+        runtime->kokoro.cancel();
+    }
+}
+
+void nexusvoice_reset_cancel(NexusVoiceRuntime* runtime) {
+    if (runtime) {
+        runtime->kokoro.reset_cancel();
+    }
+}
+
+int32_t nexusvoice_voice_count(const NexusVoiceRuntime* runtime) {
+    return runtime ? runtime->kokoro.voice_count() : 0;
+}
+
+const char* nexusvoice_voice_id(
+    const NexusVoiceRuntime* runtime,
+    int32_t index) {
+    return runtime ? runtime->kokoro.voice_id(index) : nullptr;
+}
+
+const char* nexusvoice_last_error(const NexusVoiceRuntime* runtime) {
+    return runtime ? runtime->last_error.c_str() : startup_error.c_str();
 }
 
 void nexusvoice_free_buffer(NexusVoiceBuffer* output) {
     if (output) {
         std::free(const_cast<float*>(output->samples));
-        output->samples = nullptr;
-        output->sample_count = 0;
+        clear_buffer(output);
     }
 }
 
-void nexusvoice_shutdown(void) {
-    std::lock_guard<std::mutex> guard(runtime_mutex);
-    runtime.reset();
-    last_error.clear();
+void nexusvoice_destroy(NexusVoiceRuntime* runtime) {
+    delete runtime;
 }

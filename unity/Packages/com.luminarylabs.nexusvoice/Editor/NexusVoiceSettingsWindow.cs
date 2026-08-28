@@ -25,7 +25,8 @@ namespace LuminaryLabs.NexusVoice.Editor
             EditorGUILayout.Space();
             EditorGUILayout.HelpBox(
                 "This preview uses the local Node authoring engine. From the repository's "
-                + "node folder, run `npm install`, `npm run model:download`, then `npm run serve`.",
+                + "node folder, run `npm install --onnxruntime-node-install-cuda=skip`, "
+                + "`npm run model:download`, then `npm run serve`.",
                 MessageType.Info);
 
             EditorGUILayout.Space();

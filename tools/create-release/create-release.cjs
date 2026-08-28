@@ -6,7 +6,7 @@ const { spawnSync } = require('node:child_process');
 require('../validate-package/validate-package.cjs');
 
 const repositoryRoot = path.resolve(__dirname, '..', '..');
-const version = '0.0.1-preview.1';
+const version = '0.1.0-preview.1';
 const distRoot = path.join(repositoryRoot, 'dist');
 const packageName = 'com.luminarylabs.nexusvoice';
 const packageArchive = path.join(distRoot, `NexusVoice-UPM-${version}.tgz`);
@@ -38,9 +38,15 @@ fs.cpSync(path.join(repositoryRoot, 'node'), path.join(stagingRoot, 'NodeEngine'
   recursive: true,
   filter: source => !source.includes(`${path.sep}node_modules`)
     && !source.includes(`${path.sep}output`)
+    && !source.endsWith(`${path.sep}.npmrc`)
     && !source.includes('model_quantized.onnx')
 });
 fs.cpSync(path.join(repositoryRoot, 'docs'), path.join(stagingRoot, 'Documentation'), { recursive: true });
+fs.cpSync(
+  path.join(repositoryRoot, 'native', 'models', 'nexusvoice-kokoro-v1_0'),
+  path.join(stagingRoot, 'ModelPack'),
+  { recursive: true }
+);
 for (const file of ['README.md', 'CHANGELOG.md', 'LICENSE.md', 'THIRD_PARTY_NOTICES.md']) {
   fs.copyFileSync(path.join(repositoryRoot, file), path.join(stagingRoot, file));
 }
