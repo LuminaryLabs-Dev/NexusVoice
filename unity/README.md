@@ -1,7 +1,20 @@
-# NexusVoice Unity Prototype
+# NexusVoice Unity demo project
 
-Open this folder as a Unity project.
+Open this folder in Unity 6.
 
-The current prototype contains the C# client package and a minimal demo scene. Start the Node bridge from the sibling `node/` folder before calling `NexusVoiceClient.Speak`.
+The embedded package exposes one component: `NexusVoiceEmitter`. The current validated workflow uses Node Bridge mode:
 
-The embedded package is at `Packages/com.luminarylabs.nexusvoice`. The localhost bridge is temporary integration proof. It will be replaced by an embedded native runtime before a production Unity package is released.
+```bash
+cd ../node
+npm run serve
+```
+
+Add `NexusVoiceEmitter` to any GameObject with an `AudioSource`, then call:
+
+```csharp
+emitter.Speak("Hello from NexusVoice.");
+```
+
+Run `npm run unity:model` from `node/` to populate ignored model and voice files under `Assets/StreamingAssets/NexusVoice`.
+
+Native mode is visible for integration development but is not a shipping runtime in this preview.

@@ -1,13 +1,20 @@
-# NexusVoice Native Runtime Boundary
+# NexusVoice native runtime boundary
 
-This is the stable C ABI that the Unity package will eventually call directly.
+This folder defines the stable C ABI used by `NexusVoiceEmitter`.
 
-The current implementation intentionally returns `-1` for synthesis because the Kokoro ONNX execution backend has not yet been ported into this native target. Node remains the validated reference engine and Unity currently uses its localhost bridge.
+Implemented and locally testable:
 
-Next native step:
+- Runtime initialization and shutdown.
+- Required model-file validation.
+- Input validation and deterministic error messages.
+- PCM buffer ownership and cleanup.
+- CMake smoke-test target.
 
-1. Add pinned ONNX Runtime native dependencies.
-2. Implement model/session loading.
-3. Implement Kokoro phonemization and voice embedding inputs.
-4. Return owned PCM buffers through this ABI.
-5. Build platform libraries for Windows, macOS, Linux, and Android.
+Not represented as complete:
+
+- Kokoro text normalization and phonemization.
+- Tokenization and voice-style selection.
+- ONNX Runtime session execution.
+- Platform plugin binaries.
+
+Until those dependencies are pinned, bundled, licensed, and tested, `nexusvoice_synthesize` returns a clear preview-unavailable error. Unity customers should use Node Bridge mode for authoring and must not ship Native mode from this preview.

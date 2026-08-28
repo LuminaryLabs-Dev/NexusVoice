@@ -8,6 +8,16 @@ unity/Logs/
 unity/UserSettings/
 unity/MemoryCaptures/
 native/build/
+/package-lock.json
+dist/
+unity/Assets/StreamingAssets/NexusVoice/*.onnx
+unity/Assets/StreamingAssets/NexusVoice/voices/*.bin
+unity/Assets/StreamingAssets/NexusVoice/config.json
+unity/Assets/StreamingAssets/NexusVoice/tokenizer.json
+unity/Assets/StreamingAssets/NexusVoice/tokenizer_config.json
+unity/Packages/com.luminarylabs.nexusvoice/Plugins/**/*.dll
+unity/Packages/com.luminarylabs.nexusvoice/Plugins/**/*.so
+unity/Packages/com.luminarylabs.nexusvoice/Plugins/**/*.dylib
 *.csproj
 *.sln
 *.userprefs

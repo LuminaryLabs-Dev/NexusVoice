@@ -21,8 +21,11 @@ typedef struct NexusVoiceBuffer {
 } NexusVoiceBuffer;
 
 NEXUSVOICE_API const char* nexusvoice_runtime_version(void);
+NEXUSVOICE_API int nexusvoice_initialize(const char* model_directory);
 NEXUSVOICE_API int nexusvoice_synthesize(const char* text, const char* voice, float speed, NexusVoiceBuffer* output);
+NEXUSVOICE_API const char* nexusvoice_last_error(void);
 NEXUSVOICE_API void nexusvoice_free_buffer(NexusVoiceBuffer* output);
+NEXUSVOICE_API void nexusvoice_shutdown(void);
 
 #ifdef __cplusplus
 }

@@ -4,15 +4,15 @@ using UnityEngine.UI;
 
 public sealed class NexusVoiceDemoBootstrap : MonoBehaviour
 {
-    private NexusVoiceClient client;
+    private NexusVoiceEmitter emitter;
     private InputField input;
     private Text status;
 
     private void Awake()
     {
-        client = gameObject.AddComponent<NexusVoiceClient>();
-        client.AudioReady += _ => status.text = "Audio ready";
-        client.Failed += error => status.text = "Error: " + error;
+        emitter = gameObject.AddComponent<NexusVoiceEmitter>();
+        emitter.OnAudioClipReady.AddListener(_ => status.text = "Audio ready");
+        emitter.OnError.AddListener(error => status.text = "Error: " + error);
 
         Canvas canvas = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)).GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -25,7 +25,7 @@ public sealed class NexusVoiceDemoBootstrap : MonoBehaviour
         Button button = CreateButton(canvas.transform, new Vector2(0, -80), new Vector2(260, 70));
         button.onClick.AddListener(() => {
             status.text = "Generating...";
-            client.Speak(input.text);
+            emitter.Speak(input.text);
         });
 
         status = CreateLabel(canvas.transform, new Vector2(0, -170), new Vector2(760, 50));

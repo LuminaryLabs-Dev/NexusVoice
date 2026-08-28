@@ -1,10 +1,18 @@
 {
   "name": "com.luminarylabs.nexusvoice",
-  "version": "0.1.0-preview.1",
+  "version": "0.2.0-preview.1",
   "displayName": "NexusVoice",
   "description": "Offline voice generation integration for Unity using the NexusVoice runtime.",
   "unity": "6000.0",
   "author": { "name": "Luminary Labs" },
+  "license": "ISC",
   "keywords": ["voice", "tts", "text-to-speech", "kokoro", "onnx" ],
-  "documentationUrl": "https://github.com/LuminaryLabs-Dev/NexusVoice"
+  "documentationUrl": "https://github.com/LuminaryLabs-Dev/NexusVoice",
+  "samples": [
+    {
+      "displayName": "Basic Emitter Demo",
+      "description": "A minimal NexusVoiceEmitter scripting example.",
+      "path": "Samples~/BasicDemo"
+    }
+  ]
 }
