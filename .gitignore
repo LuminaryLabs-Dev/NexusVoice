@@ -1,0 +1,13 @@
+node/node_modules/
+node/output/
+node/models/kokoro/onnx/*.onnx
+unity/Library/
+unity/Temp/
+unity/Obj/
+unity/Logs/
+unity/UserSettings/
+unity/MemoryCaptures/
+native/build/
+*.csproj
+*.sln
+*.userprefs

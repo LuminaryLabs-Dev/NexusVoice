@@ -1,0 +1,14 @@
+{
+  "name": "LuminaryLabs.NexusVoice.Runtime",
+  "rootNamespace": "LuminaryLabs.NexusVoice",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
