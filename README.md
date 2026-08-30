@@ -12,8 +12,21 @@ emitter.Speak("Welcome to NexusVoice.");
 - `unity/` — Unity demo project and embedded UPM package.
 - `native/` — C++ runtime and stable C ABI.
 - `node/` — known-good Kokoro reference engine and optional authoring bridge.
+- `studio/` — static browser studio powered by Kokoro.js and ONNX Runtime Web.
 - `tools/` — native setup, validation and release tooling.
 - `release/` — store release requirements.
+
+## NexusVoice Studio
+
+The browser Studio provides a visible way to test the voice experience without
+installing Unity. It generates speech locally in a Web Worker, uses WebGPU when
+requested and available, falls back to Q8 WASM, and exports ordinary WAV files.
+
+After GitHub Pages is enabled for GitHub Actions, the deployment target is
+<https://luminarylabs-dev.github.io/NexusVoice/>.
+
+The Studio validates Kokoro model behavior and product UX. It does not execute or
+replace the Unity package's native C++ runtime.
 
 ## Current version
 

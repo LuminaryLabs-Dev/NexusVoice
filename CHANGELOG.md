@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Added NexusVoice Studio, a static Next.js interface for local browser speech generation.
+- Added seven curated voices, speed and compute controls, playback, WAV download, and take comparison.
+- Added Web Worker inference through Kokoro.js with WebGPU and Q8 WASM paths.
+- Added a GitHub Pages build and deployment workflow for the `/NexusVoice` project path.
+
 ## 0.1.0-preview.1 — 2026-08-28
 
 - Added real Kokoro inference through a C++ C ABI and Sherpa-ONNX 1.13.6.

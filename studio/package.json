@@ -1,0 +1,30 @@
+{
+  "name": "nexusvoice-studio",
+  "version": "0.1.0-preview.1",
+  "private": true,
+  "description": "Static browser studio for testing NexusVoice Kokoro voices.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "preview": "node scripts/serve-export.mjs",
+    "typecheck": "tsc --noEmit",
+    "validate:export": "node scripts/validate-export.mjs",
+    "validate": "npm run typecheck && npm run build && npm run validate:export"
+  },
+  "dependencies": {
+    "kokoro-js": "1.2.1",
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "24.3.0",
+    "@types/react": "19.2.8",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.9.2"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "npm@11.9.0"
+}
