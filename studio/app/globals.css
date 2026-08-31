@@ -73,7 +73,7 @@ a {
   overflow: hidden;
   position: relative;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 .app-shell::before {
@@ -1079,6 +1079,10 @@ a {
 }
 
 @media (max-width: 760px) {
+  .app-shell {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
   .app-header {
     min-height: 48px;
     grid-template-columns: 1fr auto;
