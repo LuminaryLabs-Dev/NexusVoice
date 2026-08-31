@@ -12,8 +12,11 @@ for (const relative of required) {
 }
 
 const index = fs.readFileSync(path.join(output, "index.html"), "utf8");
-for (const expected of ["NexusVoice", "Give the line", "Generate voice", "Voice takes"]) {
+for (const expected of ["NexusVoice", "Direct the performance", "Listen to the take", "Generate voice", "About"]) {
   if (!index.includes(expected)) throw new Error(`Static export is missing visible content: ${expected}`);
+}
+if (index.includes("Give the line")) {
+  throw new Error("Static export still contains the removed marketing hero.");
 }
 if (!fs.existsSync(path.join(output, "_next"))) {
   throw new Error("Static export is missing its Next.js assets.");

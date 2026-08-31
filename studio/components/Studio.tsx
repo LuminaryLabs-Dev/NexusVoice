@@ -18,6 +18,8 @@ const INITIAL_STATUS: EngineStatus = {
   progress: 0
 };
 
+type Panel = "compose" | "monitor" | "takes";
+
 export function Studio() {
   const [text, setText] = useState(DEFAULT_LINE);
   const [voice, setVoice] = useState("af_heart");
@@ -27,6 +29,8 @@ export function Studio() {
   const [takes, setTakes] = useState<StudioTake[]>([]);
   const [currentTakeId, setCurrentTakeId] = useState<string | null>(null);
   const [webGpuAvailable, setWebGpuAvailable] = useState(false);
+  const [activePanel, setActivePanel] = useState<Panel>("compose");
+  const [aboutOpen, setAboutOpen] = useState(false);
   const engineRef = useRef<NexusVoiceBrowserEngine | null>(null);
   const urlsRef = useRef<string[]>([]);
 
@@ -43,6 +47,20 @@ export function Studio() {
     };
   }, []);
 
+  useEffect(() => {
+    function closeOverlay(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      if (aboutOpen) {
+        setAboutOpen(false);
+      } else if (activePanel === "takes") {
+        setActivePanel("compose");
+      }
+    }
+
+    document.addEventListener("keydown", closeOverlay);
+    return () => document.removeEventListener("keydown", closeOverlay);
+  }, [aboutOpen, activePanel]);
+
   const currentTake = useMemo(
     () => takes.find((take) => take.id === currentTakeId) ?? takes[0] ?? null,
     [currentTakeId, takes]
@@ -58,6 +76,8 @@ export function Studio() {
       return;
     }
     if (!engineRef.current || isBusy) return;
+
+    setActivePanel("monitor");
 
     try {
       setStatus({ phase: "loading", label: "Preparing the local voice model", progress: 1 });
@@ -80,7 +100,7 @@ export function Studio() {
         const allTakes = [take, ...previous];
         for (const discarded of allTakes.slice(8)) {
           URL.revokeObjectURL(discarded.url);
-          urlsRef.current = urlsRef.current.filter((url) => url !== discarded.url);
+          urlsRef.current = urlsRef.current.filter((item) => item !== discarded.url);
         }
         return allTakes.slice(0, 8);
       });
@@ -94,47 +114,69 @@ export function Studio() {
     }
   }
 
+  function showPanel(panel: Panel) {
+    setAboutOpen(false);
+    setActivePanel(panel);
+  }
+
   return (
-    <main className="site-shell">
-      <header className="site-header">
-        <a className="brand" href="#top" aria-label="NexusVoice Studio home">
+    <main className="app-shell">
+      <header className="app-header">
+        <button className="brand" type="button" onClick={() => showPanel("compose")} aria-label="Open NexusVoice composer">
           <span className="brand__mark" aria-hidden="true"><i /><i /><i /><i /></span>
           <span>NexusVoice</span>
           <em>Studio</em>
-        </a>
-        <div className="header-status">
-          <span className="header-status__dot" />
-          LOCAL · PRIVATE · PREVIEW
+        </button>
+
+        <div className="header-status" aria-live="polite">
+          <span className={status.phase === "error" ? "header-status__dot header-status__dot--error" : "header-status__dot"} />
+          <span>LOCAL · PRIVATE</span>
+          <strong>{status.phase === "idle" ? "READY" : status.phase.toUpperCase()}</strong>
         </div>
-        <a className="repo-link" href="https://github.com/LuminaryLabs-Dev/NexusVoice" target="_blank" rel="noreferrer">
-          View source <span aria-hidden="true">↗</span>
-        </a>
+
+        <nav className="header-actions" aria-label="Studio utilities">
+          <button
+            className={activePanel === "takes" ? "header-action header-action--active" : "header-action"}
+            type="button"
+            onClick={() => showPanel(activePanel === "takes" ? "compose" : "takes")}
+            aria-expanded={activePanel === "takes"}
+            aria-controls="takes-panel"
+          >
+            Takes <span>{takes.length}</span>
+          </button>
+          <button className="header-action" type="button" onClick={() => setAboutOpen(true)}>
+            About
+          </button>
+          <a className="header-action repo-link" href="https://github.com/LuminaryLabs-Dev/NexusVoice" target="_blank" rel="noreferrer">
+            Source <span aria-hidden="true">↗</span>
+          </a>
+        </nav>
       </header>
 
-      <section className="hero" id="top">
-        <div className="hero__index">NV / 001</div>
-        <div className="hero__copy">
-          <p className="kicker">A local voice instrument for games</p>
-          <h1>Give the line<br />a <span>voice.</span></h1>
-          <p className="hero__intro">
-            Write dialogue, direct a performer, and leave with a production-ready WAV.
-            Your text and audio never leave this browser.
-          </p>
-        </div>
-        <div className="hero__stamp" aria-hidden="true">
-          <span>82M</span>
-          <small>KOKORO<br />PARAMETERS</small>
-        </div>
-      </section>
+      <nav className="panel-tabs" role="tablist" aria-label="Studio panels">
+        {(["compose", "monitor", "takes"] as Panel[]).map((panel) => (
+          <button
+            key={panel}
+            type="button"
+            role="tab"
+            aria-selected={activePanel === panel}
+            aria-controls={`${panel}-panel`}
+            className={activePanel === panel ? "panel-tab panel-tab--active" : "panel-tab"}
+            onClick={() => showPanel(panel)}
+          >
+            {panel === "takes" ? `Takes · ${takes.length}` : panel}
+          </button>
+        ))}
+      </nav>
 
-      <section className="studio-grid" aria-label="NexusVoice generator">
-        <form className="composer" onSubmit={generate}>
+      <section className="workspace" data-active-panel={activePanel} aria-label="NexusVoice generator">
+        <form id="compose-panel" className="workspace-panel composer" onSubmit={generate}>
           <div className="panel-heading">
             <div>
               <span className="panel-number">01</span>
               <div>
                 <span className="eyebrow">Compose</span>
-                <h2>Direct the performance</h2>
+                <h1>Direct the performance</h1>
               </div>
             </div>
             <span className="character-count">{text.length} / {MAX_CHARACTERS}</span>
@@ -175,11 +217,11 @@ export function Studio() {
             <legend>Compute</legend>
             <label className={compute === "wasm" ? "compute-option compute-option--selected" : "compute-option"}>
               <input type="radio" name="compute" value="wasm" checked={compute === "wasm"} onChange={() => setCompute("wasm")} />
-              <span><strong>Compatible</strong><small>Q8 · about 100 MB · every modern browser</small></span>
+              <span><strong>Compatible</strong><small>Q8 · about 100 MB · modern browsers</small></span>
             </label>
             <label className={compute === "webgpu" ? "compute-option compute-option--selected" : "compute-option"}>
               <input type="radio" name="compute" value="webgpu" checked={compute === "webgpu"} onChange={() => setCompute("webgpu")} />
-              <span><strong>WebGPU</strong><small>{webGpuAvailable ? "FP32 · faster on a capable GPU" : "Not detected · automatic WASM fallback"}</small></span>
+              <span><strong>WebGPU</strong><small>{webGpuAvailable ? "FP32 · capable GPU" : "WASM fallback"}</small></span>
             </label>
           </fieldset>
 
@@ -189,10 +231,10 @@ export function Studio() {
             <span>{status.phase === "loading" ? `Loading model · ${status.progress}%` : status.phase === "generating" ? "Rendering voice…" : "Generate voice"}</span>
             <span className="generate-button__icon" aria-hidden="true">▶</span>
           </button>
-          <p className="first-run-note">First generation downloads the selected model. Later takes use the browser cache.</p>
+          <p className="first-run-note">The first generation downloads the model. Later takes use the browser cache.</p>
         </form>
 
-        <div className="output-panel">
+        <section id="monitor-panel" className="workspace-panel output-panel">
           <div className="panel-heading panel-heading--output">
             <div>
               <span className="panel-number">02</span>
@@ -201,65 +243,84 @@ export function Studio() {
                 <h2>Listen to the take</h2>
               </div>
             </div>
+            <span className="panel-format">24 KHZ · WAV</span>
           </div>
           <AudioPlayer take={currentTake} busy={isBusy} />
-        </div>
-      </section>
+        </section>
 
-      <section className="takes-section" aria-labelledby="takes-heading">
-        <div className="takes-heading">
-          <div>
-            <span className="panel-number">03</span>
-            <div>
-              <span className="eyebrow">Compare</span>
-              <h2 id="takes-heading">Voice takes</h2>
+        {activePanel === "takes" && (
+          <aside id="takes-panel" className="takes-drawer" aria-labelledby="takes-heading">
+            <div className="drawer-heading">
+              <div>
+                <span className="eyebrow">Session</span>
+                <h2 id="takes-heading">Voice takes</h2>
+              </div>
+              <button className="close-button" type="button" onClick={() => showPanel("compose")} aria-label="Close voice takes">×</button>
             </div>
-          </div>
-          <span>{takes.length ? `${takes.length} in this session` : "Generate multiple voices to compare"}</span>
-        </div>
 
-        {takes.length ? (
-          <div className="take-list">
-            {takes.map((take, index) => (
-              <button
-                key={take.id}
-                type="button"
-                className={take.id === currentTake?.id ? "take-row take-row--active" : "take-row"}
-                onClick={() => setCurrentTakeId(take.id)}
-              >
-                <span className="take-row__index">{String(takes.length - index).padStart(2, "0")}</span>
-                <span className="take-row__voice"><strong>{take.voiceName}</strong><small>{take.voice} · {take.speed.toFixed(2)}×</small></span>
-                <span className="take-row__line">“{take.text}”</span>
-                <span className="take-row__metric"><strong>{formatDuration(take.duration)}</strong><small>{formatGenerationTime(take.elapsedMs)}</small></span>
-                <span className="take-row__arrow" aria-hidden="true">→</span>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="take-list-empty">
-            <span>NO TAKES YET</span>
-            <p>Try the same line with Heart, Fenrir, and Emma. Every result stays available until this tab closes.</p>
-          </div>
+            <p className="drawer-intro">
+              {takes.length ? `${takes.length} generated take${takes.length === 1 ? "" : "s"} in this session.` : "Generate multiple voices to compare them here."}
+            </p>
+
+            {takes.length ? (
+              <div className="take-list">
+                {takes.map((take, index) => (
+                  <button
+                    key={take.id}
+                    type="button"
+                    className={take.id === currentTake?.id ? "take-row take-row--active" : "take-row"}
+                    onClick={() => {
+                      setCurrentTakeId(take.id);
+                      setActivePanel("monitor");
+                    }}
+                  >
+                    <span className="take-row__index">{String(takes.length - index).padStart(2, "0")}</span>
+                    <span className="take-row__voice"><strong>{take.voiceName}</strong><small>{take.voice} · {take.speed.toFixed(2)}×</small></span>
+                    <span className="take-row__line">“{take.text}”</span>
+                    <span className="take-row__metric"><strong>{formatDuration(take.duration)}</strong><small>{formatGenerationTime(take.elapsedMs)}</small></span>
+                    <span className="take-row__arrow" aria-hidden="true">→</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="take-list-empty">
+                <span>NO TAKES YET</span>
+                <p>Try the same line with Heart, Fenrir, and Emma. Results remain available until this tab closes.</p>
+              </div>
+            )}
+          </aside>
         )}
       </section>
 
-      <section className="privacy-strip">
-        <div className="privacy-strip__mark" aria-hidden="true">◎</div>
-        <div>
-          <span className="eyebrow">Private by architecture</span>
-          <h2>Speech happens here.<br />Not on our server.</h2>
+      {aboutOpen && (
+        <div className="modal-backdrop" onMouseDown={() => setAboutOpen(false)}>
+          <section
+            className="about-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="about-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="drawer-heading">
+              <div>
+                <span className="eyebrow">NexusVoice Studio</span>
+                <h2 id="about-title">Private by architecture.</h2>
+              </div>
+              <button className="close-button" type="button" onClick={() => setAboutOpen(false)} aria-label="Close About">×</button>
+            </div>
+            <p>Kokoro runs through ONNX Runtime Web on your device. Model files are cached by your browser; dialogue and generated audio are never uploaded by NexusVoice Studio.</p>
+            <dl className="about-details">
+              <div><dt>Model</dt><dd>Kokoro 82M</dd></div>
+              <div><dt>Audio</dt><dd>24 kHz · mono · WAV</dd></div>
+              <div><dt>Version</dt><dd>0.1.0-preview.1</dd></div>
+            </dl>
+            <div className="about-links">
+              <a href="https://github.com/LuminaryLabs-Dev/NexusVoice" target="_blank" rel="noreferrer">View source ↗</a>
+              <a href="https://github.com/LuminaryLabs-Dev/NexusVoice/blob/main/THIRD_PARTY_NOTICES.md" target="_blank" rel="noreferrer">Third-party notices ↗</a>
+            </div>
+          </section>
         </div>
-        <p>
-          Kokoro runs through ONNX Runtime Web on your device. Model files are cached by your browser;
-          dialogue and generated audio are never uploaded by NexusVoice Studio.
-        </p>
-      </section>
-
-      <footer>
-        <span>NEXUSVOICE STUDIO · 0.1.0-PREVIEW.1</span>
-        <span>Technical preview · evaluation only · <a href="https://github.com/LuminaryLabs-Dev/NexusVoice/blob/main/THIRD_PARTY_NOTICES.md" target="_blank" rel="noreferrer">third-party notices</a></span>
-        <span>© 2026 LUMINARY LABS</span>
-      </footer>
+      )}
     </main>
   );
 }
