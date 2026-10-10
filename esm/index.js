@@ -10,6 +10,7 @@ export class NexusVoiceBrowser {
     this.callbacks = new Map();
     this.pending = new Map();
     this.sequence = 0;
+    this.speechGeneration = 0;
     this.active = null;
     this.loaded = false;
     this.disposed = false;
@@ -75,17 +76,18 @@ export class NexusVoiceBrowser {
   }
   async speak(text, options = {}) {
     this.stop();
-    const token = ++this.sequence;
+    const token = ++this.speechGeneration;
     this.emit("generating", { text });
     try {
       const wav = await this.generate(text, options);
-      if (token !== this.sequence || this.disposed) return false;
+      if (token !== this.speechGeneration || this.disposed) return false;
       if (typeof Audio === "undefined") throw new Error("HTMLAudioElement unavailable");
       const url = URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
       const player = new Audio(url);
       this.active = { player, url, finish: null };
       return await new Promise((resolve, reject) => {
         const active = this.active;
+        active.cancel = () => { if (!active.finished) { active.finished = true; resolve(false); } };
         const finish = (error = null) => {
           if (active.finished) return;
           active.finished = true;
@@ -104,12 +106,12 @@ export class NexusVoiceBrowser {
         }).catch(error => finish(error));
       });
     } catch (error) {
-      if (token === this.sequence) this.emit("error", error);
+      if (token === this.speechGeneration) this.emit("error", error);
       throw error;
     }
   }
   stop() {
-    ++this.sequence;
+    ++this.speechGeneration;
     if (this.active) {
       // Cancellation has a separate event; resolve any current speak() promise.
       const active = this.active;
